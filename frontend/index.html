@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Quản lý Sản phẩm — NoSQL Cloud Demo</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">◈</span>
+    <div>
+      <h1>Kho Sản Phẩm</h1>
+      <p>Demo CRUD trên MongoDB Atlas · Google Cloud</p>
+    </div>
+  </div>
+  <div class="stats" id="statsBox">Đang tải thống kê…</div>
+</header>
+
+<main>
+  <section class="panel form-panel">
+    <h2 id="formTitle">Thêm sản phẩm mới</h2>
+    <form id="productForm">
+      <input type="hidden" id="productId" />
+
+      <label>Tên sản phẩm
+        <input type="text" id="name" required placeholder="VD: Áo thun cotton" />
+      </label>
+
+      <label>Danh mục
+        <input type="text" id="category" required placeholder="VD: Thời trang, Điện tử..." />
+      </label>
+
+      <div class="row">
+        <label>Giá (VNĐ)
+          <input type="number" id="price" required min="0" />
+        </label>
+        <label>Tồn kho
+          <input type="number" id="stock" required min="0" />
+        </label>
+      </div>
+
+      <label>Mô tả
+        <textarea id="description" rows="2" placeholder="Mô tả ngắn"></textarea>
+      </label>
+
+      <label>Thuộc tính riêng (JSON) — thể hiện tính linh hoạt NoSQL
+        <textarea id="attributes" rows="3" placeholder='VD: {"size":"M","color":"Đen"}'></textarea>
+      </label>
+
+      <div class="form-actions">
+        <button type="submit" id="submitBtn">Lưu sản phẩm</button>
+        <button type="button" id="cancelBtn" class="ghost hidden">Hủy chỉnh sửa</button>
+      </div>
+      <p id="formMsg" class="msg"></p>
+    </form>
+  </section>
+
+  <section class="panel list-panel">
+    <div class="list-head">
+      <h2>Danh sách sản phẩm</h2>
+      <input type="text" id="filterCategory" placeholder="Lọc theo danh mục…" />
+    </div>
+    <div id="productList" class="product-grid">
+      <p class="empty">Đang tải dữ liệu…</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Đồ án môn học · Xây dựng cơ sở dữ liệu NoSQL cho ứng dụng cloud (MongoDB Atlas + Google Cloud)
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
