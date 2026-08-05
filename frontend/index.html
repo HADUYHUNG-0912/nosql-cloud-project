@@ -3,75 +3,440 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Quản lý Sản phẩm — NoSQL Cloud Demo</title>
+<title>NoSQL Cloud Console — Quản lý Sản phẩm</title>
+<meta name="description" content="Ứng dụng quản lý sản phẩm NoSQL trên MongoDB Atlas và Google Cloud. Demo CRUD, Aggregation Pipeline và so sánh NoSQL vs SQL." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="style.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
-<header class="topbar">
-  <div class="brand">
-    <span class="brand-mark">◈</span>
-    <div>
-      <h1>Kho Sản Phẩm</h1>
-      <p>Demo CRUD trên MongoDB Atlas · Google Cloud</p>
+<!-- ======== TOP NAVIGATION ======== -->
+<nav class="topnav" id="topnav">
+  <div class="topnav-left">
+    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="logo-wrap">
+      <svg class="gc-logo" viewBox="0 0 74 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Google Cloud">
+        <path d="M6.6 8.5l1.6 1.6a5.5 5.5 0 107.8 0l1.6-1.6A7.8 7.8 0 116.6 8.5z" fill="#EA4335"/>
+        <path d="M12 4v8l2-2V4h-2z" fill="#4285F4"/>
+        <circle cx="12" cy="14" r="1.5" fill="#EA4335"/>
+      </svg>
+      <span class="logo-text">Cloud <span class="logo-accent">Console</span></span>
+    </div>
+    <div class="breadcrumb">
+      <span class="bc-project">nosql-cloud-project</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="#9aa0a6" stroke-width="2" stroke-linecap="round"/></svg>
+      <span class="bc-service">MongoDB Atlas · Products</span>
     </div>
   </div>
-  <div class="stats" id="statsBox">Đang tải thống kê…</div>
-</header>
+  <div class="topnav-right">
+    <div class="status-badge" id="connectionBadge">
+      <span class="status-dot connecting"></span>
+      <span class="status-text">Đang kết nối…</span>
+    </div>
+    <div class="avatar" title="Người dùng">U</div>
+  </div>
+</nav>
 
-<main>
-  <section class="panel form-panel">
-    <h2 id="formTitle">Thêm sản phẩm mới</h2>
-    <form id="productForm">
-      <input type="hidden" id="productId" />
+<!-- ======== LAYOUT ======== -->
+<div class="layout">
 
-      <label>Tên sản phẩm
-        <input type="text" id="name" required placeholder="VD: Áo thun cotton" />
-      </label>
+  <!-- ======== SIDEBAR ======== -->
+  <aside class="sidebar" id="sidebar">
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Tổng quan</div>
+      <a href="#" class="nav-item active" id="navDashboard" data-section="dashboard">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" fill="currentColor"/><rect x="14" y="3" width="7" height="7" rx="1" fill="currentColor"/><rect x="3" y="14" width="7" height="7" rx="1" fill="currentColor"/><rect x="14" y="14" width="7" height="7" rx="1" fill="currentColor"/></svg>
+        Dashboard
+      </a>
+      <div class="nav-section-label">Cơ sở dữ liệu</div>
+      <a href="#" class="nav-item" id="navProducts" data-section="products">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" stroke="currentColor" stroke-width="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" stroke="currentColor" stroke-width="2"/></svg>
+        Sản phẩm (CRUD)
+      </a>
+      <a href="#" class="nav-item" id="navStats" data-section="stats">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M18 20V10M12 20V4M6 20v-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Thống kê & Biểu đồ
+      </a>
+      <a href="#" class="nav-item" id="navBenchmark" data-section="benchmark">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Kiểm thử Truy vấn
+      </a>
+      <div class="nav-section-label">Tài liệu</div>
+      <a href="#" class="nav-item" id="navCompare" data-section="compare">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" stroke="currentColor" stroke-width="2"/></svg>
+        SQL vs NoSQL
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-info">
+        <div class="footer-label">Cluster</div>
+        <div class="footer-value">cluster0.xygxnwy</div>
+        <div class="footer-label">Region</div>
+        <div class="footer-value">Asia-Southeast1</div>
+      </div>
+    </div>
+  </aside>
 
-      <label>Danh mục
-        <input type="text" id="category" required placeholder="VD: Thời trang, Điện tử..." />
-      </label>
+  <!-- ======== MAIN CONTENT ======== -->
+  <main class="main-content">
 
-      <div class="row">
-        <label>Giá (VNĐ)
-          <input type="number" id="price" required min="0" />
-        </label>
-        <label>Tồn kho
-          <input type="number" id="stock" required min="0" />
-        </label>
+    <!-- ===== SECTION: DASHBOARD ===== -->
+    <section class="section active" id="sectionDashboard">
+      <div class="page-header">
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Tổng quan hệ thống quản lý sản phẩm trên MongoDB Atlas · Google Cloud</p>
       </div>
 
-      <label>Mô tả
-        <textarea id="description" rows="2" placeholder="Mô tả ngắn"></textarea>
-      </label>
-
-      <label>Thuộc tính riêng (JSON) — thể hiện tính linh hoạt NoSQL
-        <textarea id="attributes" rows="3" placeholder='VD: {"size":"M","color":"Đen"}'></textarea>
-      </label>
-
-      <div class="form-actions">
-        <button type="submit" id="submitBtn">Lưu sản phẩm</button>
-        <button type="button" id="cancelBtn" class="ghost hidden">Hủy chỉnh sửa</button>
+      <!-- KPI Cards -->
+      <div class="kpi-grid" id="kpiGrid">
+        <div class="kpi-card">
+          <div class="kpi-icon blue"><svg viewBox="0 0 24 24" fill="none"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" stroke="currentColor" stroke-width="2"/></svg></div>
+          <div class="kpi-info">
+            <div class="kpi-value" id="kpiTotal">—</div>
+            <div class="kpi-label">Tổng sản phẩm</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon green"><svg viewBox="0 0 24 24" fill="none"><path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" stroke="currentColor" stroke-width="2"/></svg></div>
+          <div class="kpi-info">
+            <div class="kpi-value" id="kpiCategories">—</div>
+            <div class="kpi-label">Danh mục</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon yellow"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <div class="kpi-info">
+            <div class="kpi-value" id="kpiAvgPrice">—</div>
+            <div class="kpi-label">Giá trung bình</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon red"><svg viewBox="0 0 24 24" fill="none"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <div class="kpi-info">
+            <div class="kpi-value" id="kpiLowStock">—</div>
+            <div class="kpi-label">Sắp hết hàng</div>
+          </div>
+        </div>
       </div>
-      <p id="formMsg" class="msg"></p>
-    </form>
-  </section>
 
-  <section class="panel list-panel">
-    <div class="list-head">
-      <h2>Danh sách sản phẩm</h2>
-      <input type="text" id="filterCategory" placeholder="Lọc theo danh mục…" />
-    </div>
-    <div id="productList" class="product-grid">
-      <p class="empty">Đang tải dữ liệu…</p>
-    </div>
-  </section>
-</main>
+      <!-- Mini chart trên dashboard -->
+      <div class="card-grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Phân bổ sản phẩm theo danh mục</h3>
+          </div>
+          <div class="chart-wrap chart-wrap-sm">
+            <canvas id="dashPieChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Sản phẩm tồn kho thấp (&lt; 10)</h3>
+          </div>
+          <div id="lowStockList" class="low-stock-list">
+            <p class="empty-hint">Đang tải…</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-<footer>
-  Đồ án môn học · Xây dựng cơ sở dữ liệu NoSQL cho ứng dụng cloud (MongoDB Atlas + Google Cloud)
-</footer>
+    <!-- ===== SECTION: PRODUCTS CRUD ===== -->
+    <section class="section" id="sectionProducts">
+      <div class="page-header">
+        <h1 class="page-title">Quản lý Sản phẩm</h1>
+        <p class="page-subtitle">Thêm, sửa, xóa sản phẩm — Minh chứng tính linh hoạt Schema-less của MongoDB</p>
+      </div>
+
+      <div class="products-layout">
+        <!-- Form Panel -->
+        <div class="card form-card">
+          <div class="card-header">
+            <h3 class="card-title" id="formTitle">Thêm sản phẩm mới</h3>
+            <button class="btn-icon ghost" id="cancelBtn" title="Hủy chỉnh sửa" style="display:none">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+          <form id="productForm">
+            <input type="hidden" id="productId" />
+
+            <div class="form-group">
+              <label for="name">Tên sản phẩm <span class="required">*</span></label>
+              <input type="text" id="name" required placeholder="VD: Áo thun cotton, Laptop Dell XPS 13…" />
+            </div>
+
+            <div class="form-group">
+              <label for="category">Danh mục <span class="required">*</span></label>
+              <div class="input-icon-wrap">
+                <input type="text" id="category" required placeholder="Thời trang, Điện tử, Gia dụng…" list="categoryList" />
+                <datalist id="categoryList"></datalist>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="price">Giá (VNĐ) <span class="required">*</span></label>
+                <input type="number" id="price" required min="0" placeholder="0" />
+              </div>
+              <div class="form-group">
+                <label for="stock">Tồn kho <span class="required">*</span></label>
+                <input type="number" id="stock" required min="0" placeholder="0" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="description">Mô tả</label>
+              <textarea id="description" rows="2" placeholder="Mô tả ngắn về sản phẩm…"></textarea>
+            </div>
+
+            <!-- Dynamic Attribute Builder -->
+            <div class="form-group">
+              <label>
+                Thuộc tính riêng
+                <span class="label-hint">(Schema-less — đặc điểm NoSQL)</span>
+              </label>
+              <div class="attr-builder" id="attrBuilder">
+                <!-- các hàng attribute sẽ được thêm vào đây -->
+              </div>
+              <button type="button" class="btn-add-attr" id="addAttrBtn">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Thêm thuộc tính
+              </button>
+              <div class="attr-preview-wrap">
+                <span class="attr-preview-label">JSON Preview:</span>
+                <code id="attrPreview" class="attr-preview">{}</code>
+              </div>
+            </div>
+
+            <div id="formMsg" class="form-msg"></div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn primary" id="submitBtn">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Lưu sản phẩm
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Product List -->
+        <div class="card list-card">
+          <div class="card-header">
+            <h3 class="card-title">Danh sách sản phẩm</h3>
+            <div class="search-wrap">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="#9aa0a6" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="#9aa0a6" stroke-width="2" stroke-linecap="round"/></svg>
+              <input type="text" id="filterCategory" placeholder="Lọc danh mục…" />
+            </div>
+          </div>
+          <div id="productGrid" class="product-grid">
+            <div class="loading-skeleton">
+              <div class="skeleton-card"></div>
+              <div class="skeleton-card"></div>
+              <div class="skeleton-card"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION: STATS ===== -->
+    <section class="section" id="sectionStats">
+      <div class="page-header">
+        <h1 class="page-title">Thống kê & Biểu đồ</h1>
+        <p class="page-subtitle">Kết quả từ MongoDB Aggregation Pipeline — <code>$group · $avg · $sum</code></p>
+      </div>
+      <div class="card-grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Số lượng sản phẩm theo danh mục</h3>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="barChartCount"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Giá trung bình theo danh mục (VNĐ)</h3>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="barChartPrice"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:20px">
+        <div class="card-header">
+          <h3 class="card-title">Bảng chi tiết Aggregation Pipeline</h3>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="statsTable">
+            <thead>
+              <tr>
+                <th>Danh mục</th>
+                <th>Số sản phẩm</th>
+                <th>Giá trung bình</th>
+                <th>Tổng tồn kho</th>
+              </tr>
+            </thead>
+            <tbody id="statsTableBody">
+              <tr><td colspan="4" class="empty-cell">Đang tải…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION: BENCHMARK ===== -->
+    <section class="section" id="sectionBenchmark">
+      <div class="page-header">
+        <h1 class="page-title">Kiểm thử Truy vấn</h1>
+        <p class="page-subtitle">Đo hiệu năng (ms) các kiểu truy vấn NoSQL để minh chứng tốc độ của MongoDB</p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Bảng kiểm thử Truy vấn</h3>
+          <button class="btn primary sm" id="runBenchmarkBtn">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Chạy kiểm thử
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="benchmarkTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Loại truy vấn</th>
+                <th>Mô tả</th>
+                <th>Thời gian (ms)</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody id="benchmarkBody">
+              <tr>
+                <td>1</td>
+                <td><code>GET /api/products</code></td>
+                <td>Lấy danh sách toàn bộ sản phẩm</td>
+                <td class="mono">—</td>
+                <td><span class="badge">Chưa chạy</span></td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td><code>GET /api/products/:id</code></td>
+                <td>Truy vấn 1 sản phẩm theo ID</td>
+                <td class="mono">—</td>
+                <td><span class="badge">Chưa chạy</span></td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td><code>GET /api/products/stats/category</code></td>
+                <td>Aggregation Pipeline ($group · $avg · $sum)</td>
+                <td class="mono">—</td>
+                <td><span class="badge">Chưa chạy</span></td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td><code>POST /api/products</code></td>
+                <td>Thêm sản phẩm mới với thuộc tính linh hoạt</td>
+                <td class="mono">—</td>
+                <td><span class="badge">Chưa chạy</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="benchmarkResult" class="benchmark-result" style="display:none"></div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION: COMPARE ===== -->
+    <section class="section" id="sectionCompare">
+      <div class="page-header">
+        <h1 class="page-title">So sánh NoSQL vs SQL</h1>
+        <p class="page-subtitle">Phân tích học thuật cho đề tài báo cáo: Tại sao MongoDB phù hợp hơn SQL cho bài toán này?</p>
+      </div>
+
+      <div class="card-grid-2" style="margin-bottom:20px">
+        <div class="card card-nosql">
+          <div class="card-header">
+            <div class="db-logo nosql-logo">M</div>
+            <h3 class="card-title">MongoDB (NoSQL)</h3>
+          </div>
+          <ul class="feature-list">
+            <li class="pro">Schema-less: mỗi sản phẩm có thuộc tính riêng biệt</li>
+            <li class="pro">Không cần sửa cấu trúc khi thêm loại sản phẩm mới</li>
+            <li class="pro">Aggregation Pipeline mạnh mẽ, trực tiếp trên DB</li>
+            <li class="pro">Dễ dàng scale-out theo chiều ngang (Sharding)</li>
+            <li class="pro">JSON native — phù hợp với API hiện đại</li>
+            <li class="con">ACID transaction ít mạnh hơn SQL</li>
+            <li class="con">Không có JOIN chuẩn</li>
+          </ul>
+        </div>
+        <div class="card card-sql">
+          <div class="card-header">
+            <div class="db-logo sql-logo">SQL</div>
+            <h3 class="card-title">MySQL / PostgreSQL (SQL)</h3>
+          </div>
+          <ul class="feature-list">
+            <li class="pro">ACID transaction mạnh, phù hợp ngân hàng</li>
+            <li class="pro">JOIN phức tạp được hỗ trợ hoàn toàn</li>
+            <li class="pro">Schema cố định giúp kiểm soát dữ liệu chặt chẽ</li>
+            <li class="con">Schema cứng: phải ALTER TABLE khi thêm thuộc tính mới</li>
+            <li class="con">EAV Pattern (entity-attribute-value) rất chậm và phức tạp</li>
+            <li class="con">Cột NULL lãng phí khi sản phẩm đa dạng</li>
+            <li class="con">Scale-up (nâng cấp máy chủ) tốn kém hơn</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Bảng so sánh tổng quan</h3>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table compare-table">
+            <thead>
+              <tr>
+                <th>Tiêu chí</th>
+                <th class="nosql-col">NoSQL (MongoDB)</th>
+                <th class="sql-col">SQL (MySQL)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Cấu trúc dữ liệu</td><td class="nosql-col">Linh hoạt (Schema-less)</td><td class="sql-col">Cố định (Schema chặt)</td></tr>
+              <tr><td>Thêm loại sản phẩm mới</td><td class="nosql-col win">Không cần sửa gì</td><td class="sql-col">Phải ALTER TABLE</td></tr>
+              <tr><td>Thuộc tính đặc thù (size, cpu…)</td><td class="nosql-col win">Lưu trực tiếp trong document</td><td class="sql-col">Cần EAV hoặc thêm cột NULL</td></tr>
+              <tr><td>Thống kê/Tổng hợp</td><td class="nosql-col win">Aggregation Pipeline nhanh</td><td class="sql-col">GROUP BY, JOIN phức tạp</td></tr>
+              <tr><td>Mở rộng quy mô</td><td class="nosql-col win">Scale-out dễ (Sharding)</td><td class="sql-col">Chủ yếu Scale-up</td></tr>
+              <tr><td>Tính nhất quán ACID</td><td class="nosql-col">Có (v4.0+, nhưng giới hạn)</td><td class="sql-col win">Toàn diện</td></tr>
+              <tr><td>Phù hợp bài toán này</td><td class="nosql-col win">✅ Tốt nhất</td><td class="sql-col">⚠️ Kém linh hoạt</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ======== TOAST ======== -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- ======== CONFIRM MODAL ======== -->
+<div class="modal-overlay" id="modalOverlay" style="display:none">
+  <div class="modal">
+    <div class="modal-icon danger">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+    <h3 class="modal-title">Xóa sản phẩm?</h3>
+    <p class="modal-msg" id="modalMsg">Hành động này không thể hoàn tác.</p>
+    <div class="modal-actions">
+      <button class="btn ghost" id="modalCancel">Hủy</button>
+      <button class="btn danger" id="modalConfirm">Xóa</button>
+    </div>
+  </div>
+</div>
 
 <script src="app.js"></script>
 </body>
