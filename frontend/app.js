@@ -1,5 +1,5 @@
 /* ===== CONFIGURATION ===== */
-const API_URL = "http://localhost:5000/api/products";
+const API_URL = "https://nosql-backend-nogv.onrender.com/api/products";
 
 /* ===== STATE ===== */
 let allStats = [];
