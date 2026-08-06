@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: nosql-backend
+    runtime: node
+    rootDir: nosql-cloud-project/backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: MONGO_URI
+        value: mongodb+srv://haduyhung0912_db_user:TOwUE8nrNvNEXnj2@cluster0.xygxnwy.mongodb.net/shopdb?retryWrites=true&w=majority&appName=Cluster0
+      - key: PORT
+        value: 10000
