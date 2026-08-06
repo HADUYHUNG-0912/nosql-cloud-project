@@ -2,7 +2,7 @@ services:
   - type: web
     name: nosql-backend
     runtime: node
-    rootDir: nosql-cloud-project/backend
+    rootDir: backend
     buildCommand: npm install
     startCommand: npm start
     envVars:
