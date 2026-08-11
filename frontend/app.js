@@ -491,6 +491,7 @@ document.getElementById("runBenchmarkBtn").addEventListener("click", async () =>
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: "__benchmark__", category: "__test__", price: 1, stock: 1 })
     })},
+    { label: "GET thuộc tính động", fn: () => fetch(`${API_URL}/search/attributes?attr_key=size&attr_val=M`) },
   ];
 
   let totalTime = 0;
@@ -549,6 +550,13 @@ function debounce(fn, delay) {
 const style = document.createElement("style");
 style.textContent = `.spin { animation: spinAnim .8s linear infinite; } @keyframes spinAnim { to { transform: rotate(360deg); } }`;
 document.head.appendChild(style);
+
+/* ===== FILTER CATEGORY ===== */
+if (filterCategory) {
+  filterCategory.addEventListener("input", debounce(() => {
+    loadProducts();
+  }, 500));
+}
 
 /* ===== INIT ===== */
 (async () => {
