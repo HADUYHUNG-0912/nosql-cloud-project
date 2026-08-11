@@ -97,6 +97,14 @@ async function loadStats() {
   try {
     const res = await fetch(`${API_URL}/stats/category`);
     allStats = await res.json();
+
+    // Update filter dropdown if it's a select element
+    const filterCat = document.getElementById("filterCategory");
+    if (filterCat && filterCat.tagName === "SELECT") {
+      const currentVal = filterCat.value;
+      filterCat.innerHTML = `<option value="">Tất cả danh mục</option>` + 
+        allStats.map(s => `<option value="${escapeAttr(s._id)}" ${s._id === currentVal ? 'selected' : ''}>${escapeHTML(s._id)} (${s.totalProducts})</option>`).join("");
+    }
   } catch { allStats = []; }
 }
 
@@ -553,9 +561,9 @@ document.head.appendChild(style);
 
 /* ===== FILTER CATEGORY ===== */
 if (filterCategory) {
-  filterCategory.addEventListener("input", debounce(() => {
+  filterCategory.addEventListener("change", () => {
     loadProducts();
-  }, 500));
+  });
 }
 
 /* ===== INIT ===== */
