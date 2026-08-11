@@ -566,6 +566,57 @@ if (filterCategory) {
   });
 }
 
+/* ===== DEMO ALTER TABLE ===== */
+const btnDemoAlterTable = document.getElementById("btnDemoAlterTable");
+const demoResult = document.getElementById("demoResult");
+if (btnDemoAlterTable) {
+  btnDemoAlterTable.addEventListener("click", async () => {
+    btnDemoAlterTable.disabled = true;
+    btnDemoAlterTable.innerHTML = `<svg class="spin" viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin-right:6px"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Đang chèn...`;
+    demoResult.style.display = "none";
+    
+    try {
+      const t0 = performance.now();
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: "Điện thoại Demo Mới",
+          category: "Điện thoại",
+          price: 25000000,
+          stock: 10,
+          description: "Sản phẩm chứa thuộc tính mới toanh để so sánh SQL vs NoSQL.",
+          attributes: { "camera_chính": "108MP", "camera_phụ": "12MP", "pin": "5000mAh", "sạc_nhanh": "120W" }
+        })
+      });
+      const t1 = performance.now();
+      
+      if (!res.ok) throw new Error("Lỗi API");
+      const j = await res.json();
+      
+      demoResult.style.display = "block";
+      demoResult.innerHTML = `
+        <div style="color: #0f9d58; font-weight: 500; margin-bottom: 8px;">✅ Thành công rực rỡ!</div>
+        <strong>Thời gian:</strong> ${Math.round(t1 - t0)} ms.<br/>
+        <strong>Kết quả:</strong> Hệ thống (đang có hàng vạn dữ liệu) đã lập tức ghi nhận sản phẩm mới chứa 4 thuộc tính hoàn toàn chưa từng xuất hiện <i>(camera_chính, camera_phụ, pin, sạc_nhanh)</i>.<br/>
+        <strong>So sánh SQL:</strong> Trong SQL truyền thống, bạn sẽ phải chạy lệnh <code>ALTER TABLE products ADD COLUMN camera_chính VARCHAR(50);...</code> cho toàn bộ 50.000 dòng, gây lock table, downtime và sinh ra hàng vạn ô NULL vô giá trị ở các sản phẩm khác (như Áo thun, Đồ chơi). MongoDB xử lý việc này trong 0 giây!
+      `;
+      
+      // Cleanup sau 5 giây để khỏi rác
+      setTimeout(() => {
+        fetch(`${API_URL}/${j.data._id}`, { method: "DELETE" }).catch(()=>{});
+      }, 5000);
+      
+    } catch (err) {
+      demoResult.style.display = "block";
+      demoResult.innerHTML = `<div style="color: #db4437;">❌ Lỗi: ${err.message}</div>`;
+    } finally {
+      btnDemoAlterTable.disabled = false;
+      btnDemoAlterTable.innerHTML = `<svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;margin-right:6px"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Chạy Demo`;
+    }
+  });
+}
+
 /* ===== INIT ===== */
 (async () => {
   await checkConnection();

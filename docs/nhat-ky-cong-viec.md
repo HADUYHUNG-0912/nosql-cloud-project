@@ -205,6 +205,7 @@ Người dùng (Browser)
 
 | Phiên bản | Ngày cập nhật | Người cập nhật | Nội dung tóm tắt |
 |:---:|:---:|:---:|---|
+| v1.3 | 11/08/2026 | Antigravity Agent | - Đổi ô lọc danh mục thành Select Box.<br>- Tạo API `POST /api/products/seed-bigdata` bơm 50.000 data.<br>- Thêm Demo "Thảm họa Alter Table" so sánh SQL vs NoSQL. |
 | v1.2 | 11/08/2026 | Antigravity Agent | - Bổ sung nhật ký buổi làm việc ngày 11/08/2026.<br>- Đánh dấu hoàn thành endpoint `GET /search/attributes`.<br>- Cập nhật bảng tiến độ. |
 | v1.1 | 11/08/2026 | Antigravity Agent | - Cập nhật quy ước ranh giới cho tồn kho `[0, 10)`.<br>- Bổ sung bảng Lịch sử thay đổi theo chuẩn Docs-as-Code. |
 | v1.0 | 06/08/2026 | Nhóm dự án | - Khởi tạo tài liệu nhật ký công việc ban đầu. |
