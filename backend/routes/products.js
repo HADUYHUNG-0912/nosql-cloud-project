@@ -130,4 +130,53 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// POST /api/products/seed-bigdata -> tạo dữ liệu lớn
+router.post("/seed-bigdata", async (req, res) => {
+  // Trả về ngay lập tức để không bị timeout
+  res.json({ message: "Tiến trình tạo 50.000 dữ liệu đã bắt đầu chạy ngầm trên Server." });
+
+  const categories = ["Điện thoại", "Laptop", "Thời trang", "Gia dụng", "Mỹ phẩm", "Sách", "Nội thất", "Phụ kiện", "Thể thao", "Đồ chơi"];
+  const brands = ["Samsung", "Apple", "Sony", "LG", "Asus", "Dell", "HP", "Nike", "Adidas", "Lego", "Casio"];
+  const colors = ["Đen", "Trắng", "Đỏ", "Xanh", "Vàng", "Bạc", "Hồng"];
+
+  function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+  function getRandomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  const TARGET_COUNT = 50000;
+  const BATCH_SIZE = 5000;
+  let totalInserted = 0;
+
+  try {
+    for (let batch = 0; batch < TARGET_COUNT / BATCH_SIZE; batch++) {
+      const productsBatch = [];
+      for (let i = 0; i < BATCH_SIZE; i++) {
+        const cat = getRandomItem(categories);
+        const brand = getRandomItem(brands);
+        const name = `${cat} ${brand} Series ${getRandomInt(1, 999)}`;
+        const price = getRandomInt(100, 50000) * 1000;
+        
+        let attrs = {};
+        if (cat === "Điện thoại" || cat === "Laptop") {
+          attrs = { brand, ram: `${getRandomItem([4, 8, 16, 32])}GB`, storage: `${getRandomItem([128, 256, 512, 1024])}GB` };
+        } else if (cat === "Thời trang") {
+          attrs = { brand, size: getRandomItem(["S", "M", "L", "XL"]), color: getRandomItem(colors) };
+        } else {
+          attrs = { brand, isNew: getRandomInt(0, 1) === 1 };
+        }
+
+        productsBatch.push({
+          name, category: cat, price, stock: getRandomInt(0, 500),
+          description: `Sản phẩm ${name} chất lượng cao.`,
+          attributes: attrs
+        });
+      }
+      await Product.insertMany(productsBatch);
+      totalInserted += BATCH_SIZE;
+      console.log(`[Seed BigData] Đã chèn: ${totalInserted} / ${TARGET_COUNT}`);
+    }
+  } catch (err) {
+    console.error("[Seed BigData] Lỗi:", err.message);
+  }
+});
+
 module.exports = router;
