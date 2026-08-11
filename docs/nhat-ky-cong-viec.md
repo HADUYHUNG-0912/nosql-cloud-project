@@ -72,7 +72,7 @@
   - Bar chart số lượng sản phẩm theo danh mục.
   - Bar chart giá trung bình theo danh mục.
 - **Query Benchmark**: Đo tốc độ (ms) 4 loại truy vấn khác nhau.
-- **Cảnh báo tồn kho thấp**: Badge đỏ khi `stock < 10`.
+- **Cảnh báo tồn kho thấp**: Badge đỏ khi `stock < 10` (ngưỡng `[0, 10)`).
 - **Filter & debounce**: Lọc danh mục realtime, không spam request.
 - **Connection status indicator**: Hiển thị trạng thái kết nối Atlas realtime.
 
@@ -132,10 +132,26 @@ Người dùng (Browser)
 
 ---
 
+## 📅 Ngày 11/08/2026 — Bổ sung API truy vấn thuộc tính động
+
+### ✅ 1. Thêm Endpoint Tìm kiếm theo Thuộc tính Động
+- Bổ sung route `GET /api/products/search/attributes` vào file `backend/routes/products.js`.
+- **Cơ chế**: Dùng MongoDB **dot-notation** (`attributes.<key>`) để query vào trường `Mixed` lồng nhau — đây là minh chứng rõ nhất cho sức mạnh NoSQL so với SQL (không cần `ALTER TABLE`, không cần biết trước cấu trúc).
+- **Tính năng**:
+  - Tham số bắt buộc: `attr_key` (tên thuộc tính) + `attr_val` (giá trị cần tìm).
+  - Tham số tùy chọn: `category` (lọc kết hợp), `page`, `limit` (phân trang).
+  - Trả về 400 nếu thiếu tham số, kèm ví dụ sử dụng.
+- **Ví dụ truy vấn thực tế**:
+  - `GET /api/products/search/attributes?attr_key=size&attr_val=M` → Tìm áo thun size M.
+  - `GET /api/products/search/attributes?attr_key=ram&attr_val=16GB` → Tìm laptop 16GB RAM.
+  - `GET /api/products/search/attributes?attr_key=color&attr_val=Đen&category=Thời trang` → Kết hợp filter.
+
+---
+
 ## 📋 Danh sách Công việc Còn lại
 
 ### 🟡 Ưu tiên trung bình
-- [ ] Bổ sung endpoint truy vấn theo thuộc tính động: `GET /api/products?attr_key=size&attr_val=M`.
+- [x] ~~Bổ sung endpoint truy vấn theo thuộc tính động~~ → **Hoàn thành**: `GET /api/products/search/attributes?attr_key=size&attr_val=M` (thêm vào `routes/products.js` ngày 11/08/2026).
 - [ ] Chụp ảnh màn hình MongoDB Atlas Dashboard để làm ảnh minh chứng cho báo cáo.
 - [ ] Chụp ảnh màn hình giao diện web (Dashboard, CRUD, Biểu đồ, Benchmark, SQL vs NoSQL).
 - [ ] Chụp ảnh màn hình Vercel + Render Dashboard (minh chứng deploy thành công).
@@ -183,3 +199,12 @@ Người dùng (Browser)
 
 *Nhật ký cập nhật lúc 10:00 ngày 06/08/2026*
 
+---
+
+## 🕒 Lịch sử Thay đổi (Changelog)
+
+| Phiên bản | Ngày cập nhật | Người cập nhật | Nội dung tóm tắt |
+|:---:|:---:|:---:|---|
+| v1.2 | 11/08/2026 | Antigravity Agent | - Bổ sung nhật ký buổi làm việc ngày 11/08/2026.<br>- Đánh dấu hoàn thành endpoint `GET /search/attributes`.<br>- Cập nhật bảng tiến độ. |
+| v1.1 | 11/08/2026 | Antigravity Agent | - Cập nhật quy ước ranh giới cho tồn kho `[0, 10)`.<br>- Bổ sung bảng Lịch sử thay đổi theo chuẩn Docs-as-Code. |
+| v1.0 | 06/08/2026 | Nhóm dự án | - Khởi tạo tài liệu nhật ký công việc ban đầu. |

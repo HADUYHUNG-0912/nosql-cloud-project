@@ -42,6 +42,47 @@ router.get("/stats/category", async (req, res) => {
   }
 });
 
+// GET /api/products/search/attributes?attr_key=size&attr_val=M&category=Thời trang
+// -> Tìm kiếm sản phẩm theo thuộc tính động trong trường `attributes`
+// Đây là minh chứng nổi bật của NoSQL: truy vấn vào các trường lồng nhau (nested field)
+// mà không cần biết trước cấu trúc schema — điều không thể làm dễ dàng với SQL.
+router.get("/search/attributes", async (req, res) => {
+  try {
+    const { attr_key, attr_val, category, page = 1, limit = 20 } = req.query;
+
+    // Bắt buộc phải có cả attr_key và attr_val
+    if (!attr_key || !attr_val) {
+      return res.status(400).json({
+        message: "Thiếu tham số. Cần cung cấp cả attr_key và attr_val.",
+        example: "/api/products/search/attributes?attr_key=size&attr_val=M",
+      });
+    }
+
+    // Dùng dot-notation để query vào object lồng nhau: { "attributes.size": "M" }
+    const filter = { [`attributes.${attr_key}`]: attr_val };
+
+    // Hỗ trợ kết hợp với filter theo category
+    if (category) filter.category = category;
+
+    const products = await Product.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    const total = await Product.countDocuments(filter);
+
+    res.json({
+      total,
+      page: Number(page),
+      limit: Number(limit),
+      query: { attr_key, attr_val, ...(category && { category }) },
+      data: products,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi server", error: err.message });
+  }
+});
+
 // GET /api/products/:id -> lấy 1 sản phẩm
 router.get("/:id", async (req, res) => {
   try {
